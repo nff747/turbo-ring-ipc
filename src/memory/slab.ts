@@ -58,4 +58,9 @@ export class SharedMemorySlab {
     const dest = new Uint8Array(this.sharedBuffer, chunk.byteOffset, data.length);
     dest.set(data);
   }
+
+  public readPayload(chunkIndex: number, length: number): Uint8Array {
+    const byteOffset = this.payloadOffsetBytes + (chunkIndex * this.chunkSize);
+    return new Uint8Array(this.sharedBuffer, byteOffset, length);
+  }
 }
