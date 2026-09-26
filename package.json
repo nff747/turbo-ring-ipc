@@ -1,0 +1,35 @@
+{
+  "name": "turbo-ring-ipc",
+  "version": "1.0.0",
+  "description": "⚡ Lock-Free SharedArrayBuffer Ring Buffer & Zero-Copy IPC Primitives for Web Workers, AudioWorklets, and Edge Node.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "turbo-ring-ipc": "dist/bin/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "benchmark": "tsc && node dist/bin/cli.js bench"
+  },
+  "keywords": [
+    "lock-free",
+    "spsc",
+    "mpmc",
+    "ring-buffer",
+    "sharedarraybuffer",
+    "atomics",
+    "zero-copy",
+    "ipc",
+    "web-worker",
+    "audioworklet"
+  ],
+  "author": "nff747",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.2",
+    "vitest": "^2.1.1"
+  }
+}
