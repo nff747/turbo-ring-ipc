@@ -38,6 +38,7 @@ export class SpscRingBuffer {
     const slot = head & this.layout.mask;
     this.data[slot] = value;
     AtomicUtils.storeRelease(this.header, HEADER_HEAD_OFFSET, head + 1);
+    AtomicUtils.notify(this.header, HEADER_HEAD_OFFSET, 1);
     return true;
   }
 
@@ -52,6 +53,7 @@ export class SpscRingBuffer {
     const slot = tail & this.layout.mask;
     const value = this.data[slot];
     AtomicUtils.storeRelease(this.header, HEADER_TAIL_OFFSET, tail + 1);
+    AtomicUtils.notify(this.header, HEADER_TAIL_OFFSET, 1);
     return value;
   }
 
