@@ -32,12 +32,40 @@ export class SpscRingBuffer {
     const tail = AtomicUtils.loadRelaxed(this.header, HEADER_TAIL_OFFSET);
 
     if (head - tail >= this.layout.capacity) {
-      return false; // Buffer is full
+      return false;
     }
 
     const slot = head & this.layout.mask;
     this.data[slot] = value;
     AtomicUtils.storeRelease(this.header, HEADER_HEAD_OFFSET, head + 1);
     return true;
+  }
+
+  public tryPop(): number | undefined {
+    const tail = AtomicUtils.loadRelaxed(this.header, HEADER_TAIL_OFFSET);
+    const head = AtomicUtils.loadRelaxed(this.header, HEADER_HEAD_OFFSET);
+
+    if (head === tail) {
+      return undefined; // Empty
+    }
+
+    const slot = tail & this.layout.mask;
+    const value = this.data[slot];
+    AtomicUtils.storeRelease(this.header, HEADER_TAIL_OFFSET, tail + 1);
+    return value;
+  }
+
+  public get size(): number {
+    const head = AtomicUtils.loadRelaxed(this.header, HEADER_HEAD_OFFSET);
+    const tail = AtomicUtils.loadRelaxed(this.header, HEADER_TAIL_OFFSET);
+    return Math.max(0, head - tail);
+  }
+
+  public get isFull(): boolean {
+    return this.size >= this.layout.capacity;
+  }
+
+  public get isEmpty(): boolean {
+    return this.size === 0;
   }
 }
