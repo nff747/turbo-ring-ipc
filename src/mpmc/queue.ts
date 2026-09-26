@@ -47,8 +47,41 @@ export class MpmcBoundedQueue {
           return true;
         }
       } else if (dif < 0) {
-        return false; // Queue is full
+        return false;
       }
     }
+  }
+
+  public tryDequeue(): number | undefined {
+    while (true) {
+      const pos = AtomicUtils.loadRelaxed(this.header, HEADER_TAIL_OFFSET);
+      const cellIdx = (pos & this.mask) * CELL_INTS;
+      const seq = AtomicUtils.loadRelaxed(this.cells, cellIdx + SEQ_OFFSET);
+      const dif = seq - (pos + 1);
+
+      if (dif === 0) {
+        if (AtomicUtils.compareExchange(this.header, HEADER_TAIL_OFFSET, pos, pos + 1) === pos) {
+          const val = this.cells[cellIdx + VAL_OFFSET];
+          AtomicUtils.storeRelease(this.cells, cellIdx + SEQ_OFFSET, pos + this.capacity);
+          return val;
+        }
+      } else if (dif < 0) {
+        return undefined; // Empty
+      }
+    }
+  }
+
+  public get size(): number {
+    const head = AtomicUtils.loadRelaxed(this.header, HEADER_HEAD_OFFSET);
+    const tail = AtomicUtils.loadRelaxed(this.header, HEADER_TAIL_OFFSET);
+    return Math.max(0, head - tail);
+  }
+
+  public get isEmpty(): boolean {
+    return this.size === 0;
+  }
+
+  public get isFull(): boolean {
+    return this.size >= this.capacity;
   }
 }
