@@ -51,6 +51,26 @@ export class SharedMemorySlab {
     return null;
   }
 
+  public freeChunk(chunkIndex: number): boolean {
+    if (chunkIndex < 0 || chunkIndex >= this.totalChunks) {
+      return false;
+    }
+    const word = chunkIndex >> 5;
+    const bitIndex = chunkIndex & 31;
+    const mask = ~(1 << bitIndex);
+
+    while (true) {
+      const current = AtomicUtils.loadRelaxed(this.bitmap, word);
+      if ((current & (1 << bitIndex)) === 0) {
+        return false; // Already free (double-free prevention)
+      }
+      const next = current & mask;
+      if (AtomicUtils.compareExchange(this.bitmap, word, current, next) === current) {
+        return true;
+      }
+    }
+  }
+
   public writePayload(chunk: ChunkAllocation, data: Uint8Array): void {
     if (data.length > chunk.byteLength) {
       throw new RangeError(`Data length ${data.length} exceeds chunk capacity ${chunk.byteLength}`);
