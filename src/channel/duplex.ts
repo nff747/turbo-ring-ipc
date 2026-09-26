@@ -84,6 +84,51 @@ export class DuplexFramedChannel {
     return this.sendRaw(type, correlationId, encoded);
   }
 
+  public tryReceive(): MessageEnvelope<Uint8Array | null> | null {
+    if (this.rxRing.size < FRAME_DESCRIPTOR_INTS) {
+      return null;
+    }
+
+    const type = this.rxRing.tryPop()! as MessageType;
+    const correlationId = this.rxRing.tryPop()!;
+    const chunkIndex = this.rxRing.tryPop()!;
+    const payloadLength = this.rxRing.tryPop()!;
+
+    let payload: Uint8Array | null = null;
+    if (chunkIndex >= 0 && payloadLength > 0) {
+      const raw = this.slab.readPayload(chunkIndex, payloadLength);
+      payload = new Uint8Array(raw);
+      this.slab.freeChunk(chunkIndex);
+    }
+
+    this.stats.messagesReceived++;
+    this.stats.bytesReceived += payloadLength;
+
+    return {
+      type,
+      correlationId,
+      payload,
+      byteLength: payloadLength,
+      timestamp: Date.now()
+    };
+  }
+
+  public tryReceiveJson<T = unknown>(): MessageEnvelope<T | null> | null {
+    const env = this.tryReceive();
+    if (!env) return null;
+    let parsed: T | null = null;
+    if (env.payload) {
+      parsed = JSON.parse(new TextDecoder().decode(env.payload)) as T;
+    }
+    return {
+      type: env.type,
+      correlationId: env.correlationId,
+      payload: parsed,
+      byteLength: env.byteLength,
+      timestamp: env.timestamp
+    };
+  }
+
   public getChannelStats(): ChannelStats {
     return { ...this.stats };
   }
