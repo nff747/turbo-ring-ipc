@@ -9,7 +9,7 @@ export class SharedMemorySlab {
   protected readonly bitmap: Int32Array;
   public readonly payloadOffsetBytes: number;
 
-  constructor(totalChunks = 64, chunkSize = 256) {
+  constructor(totalChunks = 64, chunkSize = 256, sharedBuffer?: SharedArrayBuffer) {
     this.totalChunks = totalChunks;
     this.chunkSize = chunkSize;
 
@@ -18,7 +18,7 @@ export class SharedMemorySlab {
     this.payloadOffsetBytes = headerBytes;
 
     const totalBytes = headerBytes + (totalChunks * chunkSize);
-    this.sharedBuffer = new SharedArrayBuffer(totalBytes);
+    this.sharedBuffer = sharedBuffer ?? new SharedArrayBuffer(totalBytes);
     this.bitmap = new Int32Array(this.sharedBuffer, 0, bitmapInts);
   }
 
