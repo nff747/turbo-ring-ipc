@@ -66,9 +66,19 @@ export class MpmcBoundedQueue {
           return val;
         }
       } else if (dif < 0) {
-        return undefined; // Empty
+        return undefined;
       }
     }
+  }
+
+  public peek(): number | undefined {
+    const pos = AtomicUtils.loadRelaxed(this.header, HEADER_TAIL_OFFSET);
+    const cellIdx = (pos & this.mask) * CELL_INTS;
+    const seq = AtomicUtils.loadRelaxed(this.cells, cellIdx + SEQ_OFFSET);
+    if (seq === pos + 1) {
+      return this.cells[cellIdx + VAL_OFFSET];
+    }
+    return undefined;
   }
 
   public get size(): number {
