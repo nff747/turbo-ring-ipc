@@ -55,6 +55,27 @@ export class SpscRingBuffer {
     return value;
   }
 
+  public pushBatch(values: ArrayLike<number>): number {
+    let pushed = 0;
+    for (let i = 0; i < values.length; i++) {
+      if (!this.tryPush(values[i])) {
+        break;
+      }
+      pushed++;
+    }
+    return pushed;
+  }
+
+  public popBatch(outBuffer: Int32Array, maxCount = outBuffer.length): number {
+    let count = 0;
+    while (count < maxCount) {
+      const val = this.tryPop();
+      if (val === undefined) break;
+      outBuffer[count++] = val;
+    }
+    return count;
+  }
+
   public clear(): void {
     const head = AtomicUtils.loadRelaxed(this.header, HEADER_HEAD_OFFSET);
     AtomicUtils.storeRelease(this.header, HEADER_TAIL_OFFSET, head);
