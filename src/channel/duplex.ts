@@ -40,6 +40,10 @@ export class DuplexFramedChannel {
     return { endpointA, endpointB };
   }
 
+  public setHandler(handler: MessageHandler): void {
+    this.handler = handler;
+  }
+
   public sendRaw(type: MessageType, correlationId: number, data?: Uint8Array): boolean {
     if (this.txRing.capacity - this.txRing.size < FRAME_DESCRIPTOR_INTS) {
       return false;
@@ -127,6 +131,41 @@ export class DuplexFramedChannel {
       byteLength: env.byteLength,
       timestamp: env.timestamp
     };
+  }
+
+  public async request(payload: unknown, timeoutMs = 3000): Promise<Uint8Array | null> {
+    const correlationId = this.correlator.allocateId();
+    const promise = this.correlator.register(correlationId, timeoutMs);
+    const sent = this.send(MessageType.REQUEST, payload, correlationId);
+    if (!sent) {
+      this.correlator.reject(correlationId, new Error('Duplex channel tx buffer full'));
+    }
+    return promise;
+  }
+
+  public poll(maxMessages = 32): number {
+    let handled = 0;
+    while (handled < maxMessages) {
+      const env = this.tryReceive();
+      if (!env) break;
+
+      if (env.type === MessageType.RESPONSE) {
+        this.correlator.resolve(env.correlationId, env.payload);
+      } else if (env.type === MessageType.ERROR) {
+        const msg = env.payload ? new TextDecoder().decode(env.payload) : 'Remote error';
+        this.correlator.reject(env.correlationId, new Error(msg));
+      } else if (this.handler) {
+        const result = this.handler(env);
+        if (env.type === MessageType.REQUEST) {
+          Promise.resolve(result).then(
+            res => this.send(MessageType.RESPONSE, res, env.correlationId),
+            err => this.send(MessageType.ERROR, err instanceof Error ? err.message : String(err), env.correlationId)
+          );
+        }
+      }
+      handled++;
+    }
+    return handled;
   }
 
   public getChannelStats(): ChannelStats {
