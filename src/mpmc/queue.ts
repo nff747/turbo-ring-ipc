@@ -101,6 +101,14 @@ export class MpmcBoundedQueue {
     return this.size === 0;
   }
 
+  public enqueue(value: number): boolean {
+    return this.tryEnqueue(value);
+  }
+
+  public dequeue(): number | undefined {
+    return this.tryDequeue();
+  }
+
   public get isFull(): boolean {
     return this.size >= this.capacity;
   }

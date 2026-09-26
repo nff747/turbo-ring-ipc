@@ -84,6 +84,9 @@ export class DuplexFramedChannel {
     if (payload instanceof Uint8Array) {
       return this.sendRaw(type, correlationId, payload);
     }
+    if (typeof payload === 'string') {
+      return this.sendRaw(type, correlationId, new TextEncoder().encode(payload));
+    }
     const encoded = new TextEncoder().encode(JSON.stringify(payload));
     return this.sendRaw(type, correlationId, encoded);
   }
