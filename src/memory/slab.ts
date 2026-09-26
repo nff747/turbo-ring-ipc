@@ -62,7 +62,7 @@ export class SharedMemorySlab {
     while (true) {
       const current = AtomicUtils.loadRelaxed(this.bitmap, word);
       if ((current & (1 << bitIndex)) === 0) {
-        return false; // Already free (double-free prevention)
+        return false;
       }
       const next = current & mask;
       if (AtomicUtils.compareExchange(this.bitmap, word, current, next) === current) {
@@ -82,5 +82,9 @@ export class SharedMemorySlab {
   public readPayload(chunkIndex: number, length: number): Uint8Array {
     const byteOffset = this.payloadOffsetBytes + (chunkIndex * this.chunkSize);
     return new Uint8Array(this.sharedBuffer, byteOffset, length);
+  }
+
+  public requiredChunks(bytes: number): number {
+    return Math.ceil(bytes / this.chunkSize);
   }
 }
