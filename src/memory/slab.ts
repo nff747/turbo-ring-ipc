@@ -28,15 +28,14 @@ export class SharedMemorySlab {
       while (true) {
         const current = AtomicUtils.loadRelaxed(this.bitmap, word);
         if (current === -1) {
-          break; // All 32 bits taken in this word
+          break;
         }
 
-        // Find first zero bit
         const freeBit = (~current) & -(~current);
         const bitIndex = 31 - Math.clz32(freeBit);
         const chunkIndex = (word * 32) + bitIndex;
         if (chunkIndex >= this.totalChunks) {
-          return null; // Beyond pool limits
+          return null;
         }
 
         const next = current | (1 << bitIndex);
@@ -50,5 +49,13 @@ export class SharedMemorySlab {
       }
     }
     return null;
+  }
+
+  public writePayload(chunk: ChunkAllocation, data: Uint8Array): void {
+    if (data.length > chunk.byteLength) {
+      throw new RangeError(`Data length ${data.length} exceeds chunk capacity ${chunk.byteLength}`);
+    }
+    const dest = new Uint8Array(this.sharedBuffer, chunk.byteOffset, data.length);
+    dest.set(data);
   }
 }
