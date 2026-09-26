@@ -19,7 +19,6 @@ export class MpmcBoundedQueue {
       this.header = new Int32Array(this.sharedBuffer, 0, HEADER_TOTAL_INTS);
       this.cells = new Int32Array(this.sharedBuffer, HEADER_TOTAL_INTS * 4);
 
-      // Initialize cell sequences: cell[i].seq = i
       for (let i = 0; i < this.capacity; i++) {
         this.cells[(i * CELL_INTS) + SEQ_OFFSET] = i;
       }
@@ -31,6 +30,25 @@ export class MpmcBoundedQueue {
       this.capacity = nextPowerOfTwo(numCells);
       this.mask = this.capacity - 1;
       this.cells = new Int32Array(this.sharedBuffer, HEADER_TOTAL_INTS * 4);
+    }
+  }
+
+  public tryEnqueue(value: number): boolean {
+    while (true) {
+      const pos = AtomicUtils.loadRelaxed(this.header, HEADER_HEAD_OFFSET);
+      const cellIdx = (pos & this.mask) * CELL_INTS;
+      const seq = AtomicUtils.loadRelaxed(this.cells, cellIdx + SEQ_OFFSET);
+      const dif = seq - pos;
+
+      if (dif === 0) {
+        if (AtomicUtils.compareExchange(this.header, HEADER_HEAD_OFFSET, pos, pos + 1) === pos) {
+          this.cells[cellIdx + VAL_OFFSET] = value;
+          AtomicUtils.storeRelease(this.cells, cellIdx + SEQ_OFFSET, pos + 1);
+          return true;
+        }
+      } else if (dif < 0) {
+        return false; // Queue is full
+      }
     }
   }
 }
