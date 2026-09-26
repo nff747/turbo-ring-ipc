@@ -81,6 +81,16 @@ export class MpmcBoundedQueue {
     return undefined;
   }
 
+  public drain(): number[] {
+    const items: number[] = [];
+    while (true) {
+      const val = this.tryDequeue();
+      if (val === undefined) break;
+      items.push(val);
+    }
+    return items;
+  }
+
   public get size(): number {
     const head = AtomicUtils.loadRelaxed(this.header, HEADER_HEAD_OFFSET);
     const tail = AtomicUtils.loadRelaxed(this.header, HEADER_TAIL_OFFSET);
