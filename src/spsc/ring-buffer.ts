@@ -46,13 +46,18 @@ export class SpscRingBuffer {
     const head = AtomicUtils.loadRelaxed(this.header, HEADER_HEAD_OFFSET);
 
     if (head === tail) {
-      return undefined; // Empty
+      return undefined;
     }
 
     const slot = tail & this.layout.mask;
     const value = this.data[slot];
     AtomicUtils.storeRelease(this.header, HEADER_TAIL_OFFSET, tail + 1);
     return value;
+  }
+
+  public clear(): void {
+    const head = AtomicUtils.loadRelaxed(this.header, HEADER_HEAD_OFFSET);
+    AtomicUtils.storeRelease(this.header, HEADER_TAIL_OFFSET, head);
   }
 
   public get size(): number {
