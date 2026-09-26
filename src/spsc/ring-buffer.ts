@@ -1,7 +1,6 @@
 import { HEADER_HEAD_OFFSET, HEADER_TAIL_OFFSET, HEADER_TOTAL_INTS } from '../core/constants.js';
 import { computeRingBufferLayout, RingBufferLayout } from '../core/buffer-layout.js';
 import { AtomicUtils } from '../utils/atomics.js';
-import { QueueMetrics } from '../types/index.js';
 
 export class SpscRingBuffer {
   public readonly sharedBuffer: SharedArrayBuffer;
@@ -26,5 +25,19 @@ export class SpscRingBuffer {
 
   public get capacity(): number {
     return this.layout.capacity;
+  }
+
+  public tryPush(value: number): boolean {
+    const head = AtomicUtils.loadRelaxed(this.header, HEADER_HEAD_OFFSET);
+    const tail = AtomicUtils.loadRelaxed(this.header, HEADER_TAIL_OFFSET);
+
+    if (head - tail >= this.layout.capacity) {
+      return false; // Buffer is full
+    }
+
+    const slot = head & this.layout.mask;
+    this.data[slot] = value;
+    AtomicUtils.storeRelease(this.header, HEADER_HEAD_OFFSET, head + 1);
+    return true;
   }
 }
