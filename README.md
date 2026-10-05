@@ -3,7 +3,7 @@
 > **Ultra-Low-Latency, Lock-Free Ring Buffer & Zero-Copy SharedArrayBuffer IPC for Node.js, Web Workers, and AudioWorklets.**
 
 [![CI](https://github.com/nff747/turbo-ring-ipc/actions/workflows/ci.yml/badge.svg)](https://github.com/nff747/turbo-ring-ipc)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-Apache_2.0-blue)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue)](https://www.typescriptlang.org/)
 [![Vitest](https://img.shields.io/badge/Tested%20with-Vitest-yellow)](https://vitest.dev/)
 
