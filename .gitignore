@@ -4,3 +4,23 @@ coverage/
 *.log
 .DS_Store
 *.tsbuildinfo
+
+# Security & SCA Hygiene Rules
+.env
+.env.*
+*.env
+*.pem
+*.key
+*.cert
+*.pfx
+*.p12
+build/
+out/
+target/
+.next/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+Thumbs.db
