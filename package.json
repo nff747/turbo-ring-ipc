@@ -1,40 +1,31 @@
 {
   "name": "turbo-ring-ipc",
-  "version": "1.0.0",
-  "description": "\u26a1 Lock-Free SharedArrayBuffer Ring Buffer & Zero-Copy IPC Primitives for Web Workers, AudioWorklets, and Edge Node.js",
+  "version": "1.1.0",
+  "description": "Zero-copy, lock-free Inter-Process Communication (IPC) ring buffer for Node.js worker threads and Web Workers over SharedArrayBuffer.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "bin": {
-    "turbo-ring-ipc": "dist/bin/cli.js"
-  },
+  "type": "module",
   "scripts": {
     "build": "tsc",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "benchmark": "tsc && node dist/bin/cli.js bench"
+    "bench": "node --expose-gc dist/bench/index.js"
   },
   "keywords": [
+    "sharedarraybuffer",
+    "ipc",
     "lock-free",
+    "ring-buffer",
     "spsc",
     "mpmc",
-    "ring-buffer",
-    "sharedarraybuffer",
-    "atomics",
-    "zero-copy",
-    "ipc",
     "web-worker",
-    "audioworklet"
+    "worker-threads",
+    "futex",
+    "atomics"
   ],
-  "author": "nff747",
+  "author": "nff747 <nff747@users.noreply.github.com>",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@types/node": "^22.0.0",
-    "typescript": "^5.6.2",
-    "vitest": "^5.0.3",
-    "vite": "^8.3.2"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/nff747/turbo-ring-ipc.git"
+    "typescript": "^5.4.0",
+    "vitest": "^1.4.0"
   }
 }
