@@ -18,4 +18,13 @@ export class CRC32 {
     }
     return (crc ^ 0xFFFFFFFF) >>> 0;
   }
+
+  static computeRange(data: Uint8Array, offset: number, length: number): number {
+    let crc = 0xFFFFFFFF;
+    const end = offset + length;
+    for (let i = offset; i < end; i++) {
+      crc = (crc >>> 8) ^ this.table[(crc ^ data[i]) & 0xFF];
+    }
+    return (crc ^ 0xFFFFFFFF) >>> 0;
+  }
 }
