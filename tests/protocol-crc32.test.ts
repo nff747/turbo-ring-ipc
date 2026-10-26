@@ -11,4 +11,10 @@ describe('CRC32 Protocol Verification', () => {
     const padded = new TextEncoder().encode('PREFIX-123456789-SUFFIX');
     expect(CRC32.computeRange(padded, 7, 9)).toBe(0xCBF43926);
   });
+
+  it('rejects out-of-bounds offsets with RangeError', () => {
+    const buf = new Uint8Array(10);
+    expect(() => CRC32.computeRange(buf, 8, 5)).toThrow(RangeError);
+    expect(() => CRC32.computeRange(buf, -1, 2)).toThrow(RangeError);
+  });
 });
