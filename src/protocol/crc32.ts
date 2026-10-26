@@ -20,6 +20,9 @@ export class CRC32 {
   }
 
   static computeRange(data: Uint8Array, offset: number, length: number): number {
+    if (offset < 0 || length < 0 || offset + length > data.length) {
+      throw new RangeError(`Out of bounds buffer access in CRC32.computeRange: offset=${offset}, length=${length}, bufferLength=${data.length}`);
+    }
     let crc = 0xFFFFFFFF;
     const end = offset + length;
     for (let i = offset; i < end; i++) {
