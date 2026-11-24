@@ -1,5 +1,7 @@
 # ⚡ turbo-ring-ipc
 
+[![Lunar Paradox](https://img.shields.io/badge/Organization-Lunar_Paradox-0a0e1a?style=for-the-badge&logo=probot&logoColor=d7b886)](https://lunarparadox.com)
+
 > **Ultra-Low-Latency, Lock-Free Ring Buffer & Zero-Copy SharedArrayBuffer IPC for Node.js, Web Workers, and AudioWorklets.**
 
 [![CI](https://github.com/nff747/turbo-ring-ipc/actions/workflows/ci.yml/badge.svg)](https://github.com/nff747/turbo-ring-ipc)
@@ -172,3 +174,7 @@ Cross-Origin-Embedder-Policy: require-corp
 git clone https://github.com/nff747/turbo-ring-ipc.git && cd turbo-ring-ipc
 npm install && npm run bench
 ```
+
+---
+
+*A component of the [Lunar Paradox](https://lunarparadox.com) applied systems & graphics laboratory. Engineered by nff747.*

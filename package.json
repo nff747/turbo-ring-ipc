@@ -22,7 +22,7 @@
     "futex",
     "atomics"
   ],
-  "author": "nff747 <nff747@users.noreply.github.com>",
+  "author": "Lunar Paradox <engineering@lunarparadox.com>",
   "license": "Apache-2.0",
   "devDependencies": {
     "typescript": "^5.4.0",
